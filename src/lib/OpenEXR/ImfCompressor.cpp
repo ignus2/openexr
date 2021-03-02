@@ -112,6 +112,20 @@ isValidCompression (Compression c)
     }
 }
 
+bool isLossyCompression(Compression c)
+{
+    switch (c)
+    {
+      case B44_COMPRESSION:
+      case B44A_COMPRESSION:
+      case DWAA_COMPRESSION:
+      case DWAB_COMPRESSION:
+	return true;
+      default:
+	return false;
+    }
+}
+
 bool isValidDeepCompression(Compression c)
 {
   switch(c)
@@ -241,10 +255,14 @@ newTileCompressor (Compression c,
 	return new B44Compressor (hdr, tileLineSize, numTileLines, true);
 
       case DWAA_COMPRESSION:
-      case DWAB_COMPRESSION:
 
 	return new DwaCompressor (hdr, tileLineSize, numTileLines, 
                                DwaCompressor::DEFLATE);
+
+      case DWAB_COMPRESSION:
+
+	return new DwaCompressor (hdr, tileLineSize, numTileLines, 
+                               DwaCompressor::STATIC_HUFFMAN);
 
       default:
 

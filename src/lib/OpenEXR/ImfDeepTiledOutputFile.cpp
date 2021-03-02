@@ -71,6 +71,7 @@
 #include <assert.h>
 #include <map>
 #include <algorithm>
+#include <limits>
 
 #include "ImfNamespace.h"
 
@@ -1197,6 +1198,21 @@ DeepTiledOutputFile::initialize (const Header &header)
     _data->minY = dataWindow.min.y;
     _data->maxY = dataWindow.max.y;
 
+   _data->maxSampleCountTableSize = _data->tileDesc.ySize *
+                                     _data->tileDesc.xSize *
+                                     sizeof(int);
+
+    //
+    // impose limit of 2^32 bytes of storage for maxSampleCountTableSize
+    // (disallow files with very large tile areas that would otherwise cause excessive memory allocation)
+    //
+
+    if(_data->maxSampleCountTableSize > std::numeric_limits<unsigned int>::max())
+    {
+        THROW(IEX_NAMESPACE::ArgExc, "Deep tile size exceeds maximum permitted area");
+    }
+
+
     //
     // Precompute level and tile information to speed up utility functions
     //
@@ -1236,9 +1252,6 @@ DeepTiledOutputFile::initialize (const Header &header)
     //ignore the existing value of chunkCount - correct it if it's wrong
     _data->header.setChunkCount(getChunkOffsetTableSize(_data->header));
                                       
-    _data->maxSampleCountTableSize = _data->tileDesc.ySize *
-                                     _data->tileDesc.xSize *
-                                     sizeof(int);
 
                                      
     for (size_t i = 0; i < _data->tileBuffers.size(); i++)
@@ -1264,7 +1277,7 @@ DeepTiledOutputFile::~DeepTiledOutputFile ()
     if (_data)
     {
         {
-#if ILMBASE_THREADING_ENABLED
+#if ILMTHREAD_THREADING_ENABLED
             std::lock_guard<std::mutex> lock(*_data->_streamData);
 #endif
             Int64 originalPosition = _data->_streamData->os->tellp();
@@ -1326,7 +1339,7 @@ DeepTiledOutputFile::header () const
 void
 DeepTiledOutputFile::setFrameBuffer (const DeepFrameBuffer &frameBuffer)
 {
-#if ILMBASE_THREADING_ENABLED
+#if ILMTHREAD_THREADING_ENABLED
     std::lock_guard<std::mutex> lock (*_data->_streamData);
 #endif
     //
@@ -1437,7 +1450,7 @@ DeepTiledOutputFile::setFrameBuffer (const DeepFrameBuffer &frameBuffer)
 const DeepFrameBuffer &
 DeepTiledOutputFile::frameBuffer () const
 {
-#if ILMBASE_THREADING_ENABLED
+#if ILMTHREAD_THREADING_ENABLED
     std::lock_guard<std::mutex> lock (*_data->_streamData);
 #endif
     return _data->frameBuffer;
@@ -1450,7 +1463,7 @@ DeepTiledOutputFile::writeTiles (int dx1, int dx2, int dy1, int dy2,
 {
     try
     {
-#if ILMBASE_THREADING_ENABLED
+#if ILMTHREAD_THREADING_ENABLED
         std::lock_guard<std::mutex> lock (*_data->_streamData);
 #endif
 
@@ -1722,7 +1735,7 @@ DeepTiledOutputFile::copyPixels (DeepTiledInputFile &in)
  
     int numAllTiles = in.totalTiles();                              
                               
-#if ILMBASE_THREADING_ENABLED
+#if ILMTHREAD_THREADING_ENABLED
     std::lock_guard<std::mutex> lock (*_data->_streamData);
 #endif
     //
@@ -1994,7 +2007,7 @@ DeepTiledOutputFile::isValidTile (int dx, int dy, int lx, int ly) const
 void
 DeepTiledOutputFile::updatePreviewImage (const PreviewRgba newPixels[])
 {
-#if ILMBASE_THREADING_ENABLED
+#if ILMTHREAD_THREADING_ENABLED
     std::lock_guard<std::mutex> lock (*_data->_streamData);
 #endif
     if (_data->previewPosition <= 0)
@@ -2047,7 +2060,7 @@ DeepTiledOutputFile::breakTile
      int length,
      char c)
 {
-#if ILMBASE_THREADING_ENABLED
+#if ILMTHREAD_THREADING_ENABLED
     std::lock_guard<std::mutex> lock (*_data->_streamData);
 #endif
     Int64 position = _data->tileOffsets (dx, dy, lx, ly);

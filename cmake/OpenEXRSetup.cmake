@@ -5,7 +5,7 @@ include(GNUInstallDirs)
 
 if(NOT "${CMAKE_PROJECT_NAME}" STREQUAL "${PROJECT_NAME}")
   set(OPENEXR_IS_SUBPROJECT ON)
-  message(NOTICE "OpenEXR is configuring as a cmake sub project")
+  message(STATUS "OpenEXR is configuring as a cmake subproject")
 endif()
 
 ########################
@@ -27,14 +27,15 @@ set(OPENEXR_PACKAGE_NAME "OpenEXR ${OPENEXR_VERSION}" CACHE STRING "Public strin
 
 # Namespace-related settings, allows one to customize the
 # namespace generated, and to version the namespaces
-set(ILMBASE_NAMESPACE_CUSTOM "0" CACHE STRING "Whether the namespace has been customized (so external users know)")
-set(ILMBASE_INTERNAL_IEX_NAMESPACE "Iex_${ILMBASE_VERSION_API}" CACHE STRING "Real namespace for Iex that will end up in compiled symbols")
-set(ILMBASE_INTERNAL_ILMTHREAD_NAMESPACE "IlmThread_${ILMBASE_VERSION_API}" CACHE STRING "Real namespace for IlmThread that will end up in compiled symbols")
-set(ILMBASE_IEX_NAMESPACE "Iex" CACHE STRING "Public namespace alias for Iex")
-set(ILMBASE_ILMTHREAD_NAMESPACE "IlmThread" CACHE STRING "Public namespace alias for IlmThread")
-set(ILMBASE_PACKAGE_NAME "IlmBase ${ILMBASE_VERSION}" CACHE STRING "Public string / label for displaying package")
+set(ILMTHREAD_NAMESPACE_CUSTOM "0" CACHE STRING "Whether the namespace has been customized (so external users know)")
+set(ILMTHREAD_INTERNAL_NAMESPACE "IlmThread_${OPENEXR_VERSION_API}" CACHE STRING "Real namespace for IlmThread that will end up in compiled symbols")
+set(ILMTHREAD_NAMESPACE "IlmThread" CACHE STRING "Public namespace alias for IlmThread")
 
-# Whether to generate and install a pkg-config file OpenEXR.pc and IlmBase.pc
+set(IEX_NAMESPACE_CUSTOM "0" CACHE STRING "Whether the namespace has been customized (so external users know)")
+set(IEX_INTERNAL_NAMESPACE "Iex_${OPENEXR_VERSION_API}" CACHE STRING "Real namespace for Iex that will end up in compiled symbols")
+set(IEX_NAMESPACE "Iex" CACHE STRING "Public namespace alias for Iex")
+
+# Whether to generate and install a pkg-config file OpenEXR.pc
 if (WIN32)
 option(OPENEXR_INSTALL_PKG_CONFIG "Install OpenEXR.pc file" OFF)
 else()
@@ -68,14 +69,12 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # (if you should choose to install those)
 set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "Suffix for debug builds")
 
-# Usual cmake option to build shared libraries or not
-option(BUILD_SHARED_LIBS "Build shared library" ON)
-# This allows a "double library" setup, where we compile both
-# a dynamic and shared library
-option(OPENEXR_BUILD_BOTH_STATIC_SHARED  "Build both static and shared libraries in one step (otherwise follows BUILD_SHARED_LIBS)" OFF)
-if (OPENEXR_BUILD_BOTH_STATIC_SHARED)
-  set(BUILD_SHARED_LIBS ON)
+if(NOT OPENEXR_IS_SUBPROJECT)
+  # Usual cmake option to build shared libraries or not, only overriden if OpenEXR is a top level project,
+  # in general this setting should be explicitly configured by the end user
+  option(BUILD_SHARED_LIBS "Build shared library" ON)
 endif()
+
 # Suffix to append to root name, this helps with version management
 # but can be turned off if you don't care, or otherwise customized
 set(OPENEXR_LIB_SUFFIX "-${OPENEXR_VERSION_API}" CACHE STRING "string added to the end of all the libraries")
@@ -165,9 +164,9 @@ endif()
 if(OPENEXR_FORCE_INTERNAL_ZLIB OR NOT ZLIB_FOUND)
   set(zlib_VER "1.2.11")
   if(OPENEXR_FORCE_INTERNAL_ZLIB)
-    message(NOTICE "Compiling internal copy of zlib version ${zlib_VER}")
+    message(STATUS "Compiling internal copy of zlib version ${zlib_VER}")
   else()
-    message(NOTICE "ZLIB library not found, compiling ${zlib_VER}")
+    message(STATUS "zlib library not found, compiling ${zlib_VER}")
   endif()
 
   # Unfortunately, zlib has an ancient cmake setup which does not include
@@ -255,7 +254,7 @@ if(NOT TARGET Imath::Imath AND NOT Imath_FOUND)
   if (${CMAKE_VERSION} VERSION_LESS "3.11.0")
     message(FATAL_ERROR "CMake 3.11 or newer is required for FetchContent, you must manually install Imath if you are using an earlier version of CMake")
   endif()
-  message(NOTICE "Imath was not found, installing from github")
+  message(STATUS "Imath was not found, installing from github")
   
   include(FetchContent)
   FetchContent_Declare(Imath

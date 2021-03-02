@@ -62,6 +62,7 @@ add_executable(OpenEXRTest
   testLargeDataWindowOffsets.cpp
   testB44ExpLogTable.cpp
   testDwaLookups.cpp
+  testIDManifest.cpp
   random.cpp
 )
 target_compile_definitions(OpenEXRTest PRIVATE ILM_IMF_TEST_IMAGEDIR="${CMAKE_CURRENT_SOURCE_DIR}/")
@@ -69,7 +70,7 @@ target_link_libraries(OpenEXRTest OpenEXR::OpenEXR)
 set_target_properties(OpenEXRTest PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
-if(WIN32 AND (BUILD_SHARED_LIBS OR OPENEXR_BUILD_BOTH_STATIC_SHARED))
+if(WIN32 AND BUILD_SHARED_LIBS)
   target_compile_definitions(OpenEXRTest PRIVATE OPENEXR_DLL)
 endif()
 
@@ -139,4 +140,5 @@ define_openexr_tests(
  testWav
  testXdr
  testYca
+ testIDManifest
 )

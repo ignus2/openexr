@@ -21,13 +21,11 @@ openexr_define_library(IlmThread
     IlmThreadExport.h
     IlmThreadForward.h
   DEPENDENCIES
+    OpenEXR::Config
     OpenEXR::Iex
 )
 
 if(OPENEXR_ENABLE_THREADING)
   target_link_libraries(IlmThread PUBLIC Threads::Threads)
-  if(OPENEXR_BUILD_BOTH_STATIC_SHARED)
-    target_link_libraries(IlmThread_static PUBLIC Threads::Threads)
-  endif()
 endif()
 

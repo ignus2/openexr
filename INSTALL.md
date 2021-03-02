@@ -119,20 +119,15 @@ the directory in which to install OpenEXR:
 
 The libraries in OpenEXR follow the standard cmake setting of
 ``BUILD_SHARED_LIBS`` to control whether to build static or shared
-libraries. However, there also exists an option
-``OPENEXR_BUILD_BOTH_STATIC_SHARED`` to enable building both shared
-and static libraries as part of one configuration, in addition to
-other customization options. Please see cmake/OpenEXRSetup.cmake for
-these options.
+libraries.
+
+Please see cmake/OpenEXRSetup.cmake for other customization options.
 
 ## Custom Namespaces
 
 If you are interested in controlling custom namespace declarations or
 similar options, you are encouraged to look at the ``CMakeLists.txt``
-infrastructure. In particular, there has been an attempt to centralize
-the settings into a common place to more easily see all of them in a
-text editor. For IlmBase, this is config/IlmBaseSetup.cmake inside the
-IlmBase tree. For OpenEXR, the settings will similarly be found in
+infrastructure. The settings can be found in
 ``cmake/OpenEXRSetup.cmake``. As per usual, these settings can also be
 seen and/or edited using any of the various gui editors for working
 with cmake such as ``ccmake``, ``cmake-gui``, as well as some of the
@@ -199,70 +194,49 @@ You can customize these options three ways:
 
 ### Library Naming Options:
 
-* **ILMBASE\_LIB\_SUFFIX**
-
-  Append the given string to the end of all the IlmBase libraries. Default is ``-<major>_<minor>`` version string. Please see the section on library names
-
 * **OPENEXR\_LIB\_SUFFIX**
 
   Append the given string to the end of all the OpenEXR libraries. Default is ``-<major>_<minor>`` version string. Please see the section on library names
 
 ### Namespace Options:
 
-* **ILMBASE\_IEX\_NAMESPACE**
-
-  Public namespace alias for Iex. Default is ``Iex``.
-
-* **ILMBASE\_ILMTHREAD\_NAMESPACE**
-
-  Public namespace alias for IlmThread. Default is ``IlmThread``.
-
-* **ILMBASE\_IMATH\_NAMESPACE**
- 
-  Public namespace alias for Imath. Default is ``Imath``.
-
-* **ILMBASE\_INTERNAL\_IEX\_NAMESPACE**
- 
-  Real namespace for Iex that will end up in compiled symbols. Default is ``Iex\_<major>\_<minor>``.
-
-* **ILMBASE\_INTERNAL\_ILMTHREAD\_NAMESPACE**
- 
-  Real namespace for IlmThread that will end up in compiled symbols. Default is ``IlmThread\_<major>\_<minor>``.
-
-* **ILMBASE\_INTERNAL\_IMATH\_NAMESPACE**
- 
-  Real namespace for Imath that will end up in compiled symbols. Default is ``Imath\_<major>\_<minor>``.
-
-* **ILMBASE\_NAMESPACE\_CUSTOM**
- 
-  Whether the namespace has been customized (so external users know)
-
 * **OPENEXR\_IMF\_NAMESPACE**
  
-  Public namespace alias for Imath. Default is ``Imf``.
+  Public namespace alias for OpenEXR. Default is ``Imf``.
 
 * **OPENEXR\_INTERNAL\_IMF\_NAMESPACE**
  
-  Real namespace for Imath that will end up in compiled symbols. Default is ``Imf\_<major>\_<minor>``.
+  Real namespace for OpenEXR that will end up in compiled symbols. Default is ``Imf\_<major>\_<minor>``.
 
 * **OPENEXR\_NAMESPACE\_CUSTOM**
  
   Whether the namespace has been customized (so external users know)
 
-### Linting Options:
 
-These linting options are experimental, and primarily for developer-only use at this time.
+* **IEX\_NAMESPACE**
 
-* **ILMBASE\_USE\_CLANG\_TIDY**
+  Public namespace alias for Iex. Default is ``Iex``.
+
+* **IEX\_INTERNAL\_NAMESPACE**
  
-  Enable clang-tidy for IlmBase libraries, if it is available. Default is OFF.
+  Real namespace for Iex that will end up in compiled symbols. Default is ``Iex\_<major>\_<minor>``.
 
-* **OPENEXR\_USE\_CLANG\_TIDY**
+* **IEX\_NAMESPACE\_CUSTOM**
  
-  Enable clang-tidy for OpenEXR libraries, if it is available. Default is OFF.
+  Whether the namespace has been customized (so external users know)
 
-### Testing Options:
 
+* **ILMTHREAD\_NAMESPACE**
+
+  Public namespace alias for IlmThread. Default is ``IlmThread``.
+
+* **ILMTHREAD\_INTERNAL\_NAMESPACE**
+ 
+  Real namespace for IlmThread that will end up in compiled symbols. Default is ``IlmThread\_<major>\_<minor>``.
+
+* **ILMTHREAD\_NAMESPACE\_CUSTOM**
+ 
+  Whether the namespace has been customized (so external users know)
 
 * **BUILD\_TESTING**
  

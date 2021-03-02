@@ -62,9 +62,9 @@
 
 #include <algorithm>
 #include <assert.h>
-#include <limits>
 #include <string>
 #include <vector>
+#include <limits>
 
 #include "ImfNamespace.h"
 
@@ -200,7 +200,7 @@ class MultiPartInputFile;
 //
 
 struct DeepTiledInputFile::Data
-#if ILMBASE_THREADING_ENABLED
+#if ILMTHREAD_THREADING_ENABLED
     : public std::mutex
 #endif
 {
@@ -960,7 +960,7 @@ DeepTiledInputFile::compatibilityInitialize(OPENEXR_IMF_INTERNAL_NAMESPACE::IStr
 void
 DeepTiledInputFile::multiPartInitialize(InputPartData* part)
 {
-    if (isTiled(part->header.type()) == false)
+    if (part->header.type() != DEEPTILE)
         THROW (IEX_NAMESPACE::ArgExc, "Can't build a DeepTiledInputFile from a part of type " << part->header.type());
 
     _data->_streamData = part->mutex;
@@ -1001,6 +1001,24 @@ DeepTiledInputFile::initialize ()
     _data->tileDesc = _data->header.tileDescription();
     _data->lineOrder = _data->header.lineOrder();
 
+
+   _data->maxSampleCountTableSize = static_cast<size_t>(_data->tileDesc.ySize) *
+                                    static_cast<size_t>(_data->tileDesc.xSize) *
+                                    sizeof(int);
+
+
+    //
+    // impose limit of 2^32 bytes of storage for maxSampleCountTableSize
+    // (disallow files with very large tile areas that would otherwise cause excessive memory allocation)
+    //
+
+
+   if(_data->maxSampleCountTableSize > std::numeric_limits<unsigned int>::max())
+   {
+       THROW(IEX_NAMESPACE::ArgExc, "Deep tile size exceeds maximum permitted area");
+   }
+
+
     //
     // Save the dataWindow information
     //
@@ -1034,9 +1052,6 @@ DeepTiledInputFile::initialize ()
     for (size_t i = 0; i < _data->tileBuffers.size(); i++)
         _data->tileBuffers[i] = new TileBuffer ();
 
-    _data->maxSampleCountTableSize = static_cast<size_t>(_data->tileDesc.ySize) *
-                                     static_cast<size_t>(_data->tileDesc.xSize) *
-                                     sizeof(int);
 
     _data->sampleCountTableBuffer.resizeErase(_data->maxSampleCountTableSize);
 
@@ -1114,7 +1129,7 @@ DeepTiledInputFile::version () const
 void
 DeepTiledInputFile::setFrameBuffer (const DeepFrameBuffer &frameBuffer)
 {
-#if ILMBASE_THREADING_ENABLED
+#if ILMTHREAD_THREADING_ENABLED
     std::lock_guard<std::mutex> lock (*_data->_streamData);
 #endif
     //
@@ -1263,7 +1278,7 @@ DeepTiledInputFile::setFrameBuffer (const DeepFrameBuffer &frameBuffer)
 const DeepFrameBuffer &
 DeepTiledInputFile::frameBuffer () const
 {
-#if ILMBASE_THREADING_ENABLED
+#if ILMTHREAD_THREADING_ENABLED
     std::lock_guard<std::mutex> lock (*_data->_streamData);
 #endif
     return _data->frameBuffer;
@@ -1286,7 +1301,7 @@ DeepTiledInputFile::readTiles (int dx1, int dx2, int dy1, int dy2, int lx, int l
 
     try
     {
-#if ILMBASE_THREADING_ENABLED
+#if ILMTHREAD_THREADING_ENABLED
         std::lock_guard<std::mutex> lock (*_data->_streamData);
 #endif
         if (_data->slices.size() == 0)
@@ -1432,7 +1447,7 @@ DeepTiledInputFile::rawTileData (int &dx, int &dy,
         lx << ", " << ly << ") is missing.");
      }
      
-#if ILMBASE_THREADING_ENABLED
+#if ILMTHREAD_THREADING_ENABLED
      std::lock_guard<std::mutex> lock(*_data->_streamData);
 #endif
      if (_data->_streamData->is->tellg() != tileOffset)
@@ -1741,7 +1756,7 @@ DeepTiledInputFile::readPixelSampleCounts (int dx1, int dx2,
 
     try
     {
-#if ILMBASE_THREADING_ENABLED
+#if ILMTHREAD_THREADING_ENABLED
         std::lock_guard<std::mutex> lock (*_data->_streamData);
 #endif
         savedFilePos = _data->_streamData->is->tellg();
